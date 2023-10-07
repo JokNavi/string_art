@@ -1,7 +1,8 @@
-use rusttype::{Font, Scale, ScaledGlyph, point};
+use rusttype::{point, Font, Scale, ScaledGlyph};
 
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
 pub const COLOR: f32 = 255.0;
+pub const BRIGHTNESS_CUTOFF: f32 = 0.5;
 
 #[derive(Debug)]
 pub struct CharBrightnesses {
@@ -9,15 +10,12 @@ pub struct CharBrightnesses {
 }
 
 impl CharBrightnesses {
-    pub fn new(chars: &str, font: &Font, scale: &Scale) -> Self {
-        // if chars.contains("\n") {
-        //     panic!("chars cannot contain any newlines.");
-        // }
-        let brightnesses_tuples = Self::get_brightness_tuples(chars, &font, &scale);
-        // CharBrightnesses {
-        //     char_lut: Self::brightness_tuples_to_lut(brightnesses_tuples),
-        // }
-        todo!();
+    pub fn new(chars: &str, font: &Font, scale: u8) -> Self {
+        let brightnesses_tuples =
+            Self::get_brightness_tuples(chars, &font, &Scale::uniform(scale as f32));
+        CharBrightnesses {
+            char_lut: Self::brightness_tuples_to_lut(brightnesses_tuples),
+        }
     }
 
     pub fn get_brightness_tuples(chars: &str, font: &Font, scale: &Scale) -> Vec<(char, u8)> {
@@ -40,7 +38,7 @@ impl CharBrightnesses {
         let mut buffer = vec![buffer_column; glyph_width as usize];
         let total_pixels = glyph_width * glyph_height;
         glyph.positioned(point(0.0, 0.0)).draw(|x, y, v| {
-            if v > 0.5 {
+            if v > BRIGHTNESS_CUTOFF {
                 buffer[x as usize][y as usize] = 1u8;
             }
         });
@@ -58,12 +56,66 @@ impl CharBrightnesses {
             glyph.scale().y,
         )
     }
+
+    fn brightness_tuples_to_lut(tuples: Vec<(char, u8)>) -> [char; LUT_LENGTH] {
+        let mut lut = ['\x00'; LUT_LENGTH];
+        let mut offset = [u8::MAX; LUT_LENGTH];
+
+        for (char, brightness) in tuples {
+            lut[brightness as usize] = char;
+            offset[brightness as usize] = 0u8;
+
+            let mut i = 0usize;
+            while i < brightness as usize {
+                let new_offset = brightness - i as u8;
+                if offset[i] < new_offset {
+                    break;
+                }
+                unsafe {
+                    *offset.get_unchecked_mut(i) = new_offset;
+                    *lut.get_unchecked_mut(i) = char;
+                }
+
+                i += 1;
+            }
+
+            let mut i = (brightness + 1) as usize;
+            while i < LUT_LENGTH {
+                let new_offset = i as u8 - brightness;
+                if offset[i] < new_offset {
+                    break;
+                }
+                unsafe {
+                    *offset.get_unchecked_mut(i) = new_offset;
+                    *lut.get_unchecked_mut(i) = char;
+                }
+                i += 1;
+            }
+        }
+        lut
+    }
 }
 
 impl Default for CharBrightnesses {
     fn default() -> Self {
-        //const LUT: [char; LUT_LENGTH] = [];
-        //Self { char_lut: LUT }
-        todo!();
+        const LUT: [char; LUT_LENGTH] = [
+            '`', '`', '`', '.', '.', '.', ',', ':', '"', '_', '_', '!', '!', '!', '|', '~', '/',
+            '\\', 'r', '=', '=', '1', '1', '}', 'v', 'v', 'i', 'c', 't', 'x', 'z', 's', 's', 'o',
+            'y', 'y', 'k', 'h', 'E', 'U', 'w', 'p', 'S', 'O', 'm', '8', 'g', '@', 'Q', 'Q', 'B',
+            'N', 'N', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',
+            'W',
+        ];
+        Self { char_lut: LUT }
     }
 }

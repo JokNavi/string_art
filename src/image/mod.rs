@@ -19,7 +19,8 @@ impl Image {
     pub fn height(&self) -> usize {self.height}
     pub fn width(&self) -> usize {self.width}
     pub fn size(&self) -> usize {self.size}
-    pub fn data(&self) -> Vec<Pixel> {self.data.clone()}
+    pub fn data(&self) -> &Vec<Pixel> {&self.data}
+    pub fn data_as_mut(&mut self) -> &mut Vec<Pixel> {&mut self.data}
     /// Draws a pixel at a specified position.
     /// color: see Pixel::from_u8_rgb
     /// position: tuple representing x y position on the Image
@@ -58,7 +59,7 @@ impl Image {
             if self_pos >= self.size { 
                 break; 
             }
-            self.data[self_pos] = pixel;
+            self.data[self_pos] = *pixel;
         }
     }
 }

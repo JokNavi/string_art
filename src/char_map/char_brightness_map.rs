@@ -4,7 +4,7 @@ pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
 pub const COLOR: f32 = 255.0;
 pub const BRIGHTNESS_CUTOFF: f32 = 0.5;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CharBrightnesses {
     char_lut: [char; LUT_LENGTH],
 }
@@ -117,5 +117,21 @@ impl Default for CharBrightnesses {
             'W',
         ];
         Self { char_lut: LUT }
+    }
+}
+
+
+#[cfg(test)]
+mod char_brightnesses_tests {
+    use super::*;
+
+    #[test]
+    fn test_get_brightness_tuples() {
+        let chars = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+        let font = &Font::try_from_bytes(include_bytes!("/home/joknavi/.local/share/fonts/RobotoMono-Regular.ttf")).unwrap();
+        let scale = 255; 
+        let new = CharBrightnesses::new(chars, font, scale);
+        let default = CharBrightnesses::default();
+        assert_eq!(new, default);
     }
 }

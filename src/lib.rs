@@ -1,1 +1,1 @@
-pub mod char_map;
+pub mod string_art;

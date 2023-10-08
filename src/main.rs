@@ -3,8 +3,7 @@ pub mod window;
 
 use window::{
     image::Image,
-    pixel::{from_u8_rgb, Pixel},
-    WINDOW_NAME, WINDOW_OPTIONS, WINDOW_X, WINDOW_Y,
+    WINDOW_NAME, WINDOW_OPTIONS, WINDOW_X, WINDOW_Y, pixel::Color,
 };
 
 use minifb::{Key, KeyRepeat, MouseMode, Window};
@@ -26,25 +25,26 @@ fn handle_key_events(window: &Window) {
         });
 }
 
-fn draw_cursor_box(image: &mut Image, coords: (usize, usize), color: Pixel) {
-    image.splice_image(&Image::new(color, 200, 200), coords);
+fn draw_cursor_box(image: &mut Image, coords: (usize, usize), color: &Color) {
+    image.splice_image(&Image::new(&color, 200, 200), coords);
 }
 
 fn main() -> minifb::Result<()> {
-    let grey: Pixel = from_u8_rgb(50, 50, 50);
-    let white: Pixel = from_u8_rgb(150, 150, 150);
+    let grey = Color::Grayscale(50);
+    let white = Color::Grayscale(150);
 
     let mut window: Window = init()?;
     let mut image;
+    
     loop {
         handle_key_events(&window);
-        image = Image::new(grey, WINDOW_X, WINDOW_Y);
+        image = Image::new(&grey, WINDOW_X, WINDOW_Y);
 
         let coords = match window.get_mouse_pos(MouseMode::Clamp) {
             Some(pos) => (pos.0 as usize, pos.1 as usize),
             None => (0, 0),
         };
-        draw_cursor_box(&mut image, coords, white);
+        draw_cursor_box(&mut image, coords, &white);
 
         window.update_with_buffer(image.data(), WINDOW_X, WINDOW_Y)?;
     }

@@ -1,19 +1,18 @@
-use super::pixel::Pixel;
-
+use super::pixel::Color;
 pub struct Image {
-    data: Vec<Pixel>,
+    data: Vec<u32>,
     height: usize,
     width: usize,
     size: usize,
 }
 impl Image {
-    pub fn new(color: Pixel, width: usize, height: usize) -> Image {
+    pub fn new(color: &Color, width: usize, height: usize) -> Image {
         let size = width * height;
         Image {
             width: width,
             height: height,
             size: size,
-            data: vec![color; size],
+            data: vec![color.to_u32(); size],
         }
     }
 
@@ -26,20 +25,20 @@ impl Image {
     pub fn size(&self) -> usize {
         self.size
     }
-    pub fn data(&self) -> &[Pixel] {
+    pub fn data(&self) -> &[u32] {
         &self.data
     }
-    pub fn data_as_mut(&mut self) -> &mut [Pixel] {
+    pub fn data_as_mut(&mut self) -> &mut [u32] {
         &mut self.data
     }
     /// Draws a pixel at a specified position.
     /// color: see Pixel::from_u8_rgb
     /// position: tuple representing x y position on the Image
     /// Images are drawn starting at the top left most position (0, 0) to bottom right most position (width, height)
-    pub fn draw_pixel(&mut self, color: Pixel, position: (usize, usize)) {
+    pub fn draw_pixel(&mut self, color: &Color, position: (usize, usize)) {
         let index = position.0 + (position.1 * self.width);
         if index < self.size {
-            self.data[index] = color;
+            self.data[index] = color.to_u32();
         }
     }
     /// Draws an Image on this Image.

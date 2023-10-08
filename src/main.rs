@@ -35,4 +35,3 @@ fn main() {
         window.update_with_buffer(image.data().as_slice(), WINDOW_X, WINDOW_Y).unwrap();
         
     }
-}

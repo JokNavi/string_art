@@ -120,7 +120,6 @@ impl Default for CharBrightnesses {
     }
 }
 
-
 #[cfg(test)]
 mod char_brightnesses_tests {
     use super::*;
@@ -128,8 +127,11 @@ mod char_brightnesses_tests {
     #[test]
     fn test_get_brightness_tuples() {
         let chars = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-        let font = &Font::try_from_bytes(include_bytes!("/home/joknavi/.local/share/fonts/RobotoMono-Regular.ttf")).unwrap();
-        let scale = 255; 
+        let font = &Font::try_from_bytes(include_bytes!(
+            "/home/joknavi/.local/share/fonts/RobotoMono-Regular.ttf"
+        ))
+        .unwrap();
+        let scale = 255;
         let new = CharBrightnesses::new(chars, font, scale);
         let default = CharBrightnesses::default();
         assert_eq!(new, default);

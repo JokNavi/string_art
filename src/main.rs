@@ -6,7 +6,7 @@ use image::{
     empty_image,
     from_u8_rgb
 };
-use window::config::{
+use window::{
     WINDOW_X,
     WINDOW_Y
 };
@@ -32,7 +32,7 @@ fn main() {
         //draw box on mouse pos
         image.draw_image(&empty_image(Some(white), 200, 200), mp);
         //update window
-        window.update_with_buffer(image.data().as_slice(), WINDOW_X, WINDOW_Y).unwrap();
+        window.update_with_buffer(image.data(), WINDOW_X, WINDOW_Y).unwrap();
         
     }
 }

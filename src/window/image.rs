@@ -32,15 +32,20 @@ impl Image {
         &mut self.data
     }
     /// Draws a pixel at a specified position.
-    /// color: see Pixel::from_u8_rgb
     /// position: tuple representing x y position on the Image
     /// Images are drawn starting at the top left most position (0, 0) to bottom right most position (width, height)
     pub fn draw_pixel(&mut self, color: &Color, position: (usize, usize)) {
-        let index = position.0 + (position.1 * self.width);
-        if index < self.size {
-            self.data[index] = color.to_u32();
+        let index = position.1 * self.width + position.0;
+        self.data[index] = color.to_u32();
+    }
+    
+    pub unsafe fn draw_pixel_unchecked(&mut self, color: &Color, position: (usize, usize)) {
+        let index = position.1 * self.width + position.0;
+        unsafe {
+            *self.data.get_unchecked_mut(index) = color.to_u32();
         }
     }
+
     /// Draws an Image on this Image.
     /// other: the image to draw
     /// position: tuple representing the xy position on this Image to start drawing other

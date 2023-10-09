@@ -29,7 +29,7 @@ fn draw_cursor_box(image: &mut Image, coords: (usize, usize), color: &Color) {
     image.splice_image(&Image::new(&color, 200, 200), coords);
 }
 
-fn main() -> minifb::Result<()> {
+fn demo() -> minifb::Result<()> {
     let grey = Color::Grayscale(50);
     let white = Color::Grayscale(150);
 
@@ -48,4 +48,7 @@ fn main() -> minifb::Result<()> {
 
         window.update_with_buffer(image.data(), WINDOW_X, WINDOW_Y)?;
     }
+}
+
+fn main() {
 }

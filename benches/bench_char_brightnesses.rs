@@ -4,7 +4,7 @@ extern crate test;
 #[cfg(test)]
 mod benchmarks {
     use rusttype::{Font, Scale};
-    use string_art::char_map::char_brightness_map::CharBrightnesses;
+    use string_art::string_art::char_brightness_map::CharBrightnesses;
     use test::{black_box, Bencher};
 
     const CHARS: &str = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";

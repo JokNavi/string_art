@@ -1,1 +1,2 @@
-pub mod char_map;
+pub mod string_art;
+pub mod window;

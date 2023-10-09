@@ -9,7 +9,7 @@ mod benchmarks {
 
     const CHARS: &str = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     const FONT_BYTES: &[u8; 86908] =
-        include_bytes!("/home/joknavi/.local/share/fonts/RobotoMono-Regular.ttf");
+        include_bytes!("../RobotoMono-Regular.ttf");
     const SCALE: u8 = 50;
 
     #[bench]

@@ -3,7 +3,7 @@ pub mod window;
 
 use window::{
     image::Image,
-    WINDOW_NAME, WINDOW_OPTIONS, WINDOW_X, WINDOW_Y, pixel::Color,
+    WINDOW_NAME, WINDOW_OPTIONS, WINDOW_X, WINDOW_Y, color::Color,
 };
 
 use minifb::{Key, KeyRepeat, MouseMode, Window};

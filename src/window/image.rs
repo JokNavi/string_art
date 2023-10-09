@@ -1,4 +1,4 @@
-use super::pixel::Color;
+use super::color::Color;
 pub struct Image {
     data: Vec<u32>,
     height: usize,

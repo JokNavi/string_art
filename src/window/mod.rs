@@ -1,5 +1,5 @@
 pub mod image;
-pub mod pixel;
+pub mod color;
 
 use minifb::{Scale, ScaleMode, WindowOptions};
 

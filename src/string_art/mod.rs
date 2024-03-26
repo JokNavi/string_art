@@ -1,1 +1,1 @@
-pub mod char_brightness_map;
+pub mod char_brightness_lut;

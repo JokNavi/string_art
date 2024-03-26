@@ -1,18 +1,15 @@
 use rusttype::{point, Font, Scale, ScaledGlyph};
 
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
-pub const COLOR: f32 = 255.0;
-pub const BRIGHTNESS_CUTOFF: f32 = 0.5;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy, Eq)]
 pub struct CharBrightnesses {
-    char_lut: [char; LUT_LENGTH],
+    char_lut: [char; 256],
 }
 
 impl CharBrightnesses {
     pub fn new(chars: &str, font: &Font, scale: u8) -> Self {
-        let brightnesses_tuples =
-            Self::get_brightness_tuples(chars, &font, &Scale::uniform(scale as f32));
+        let brightnesses_tuples = Self::get_brightness_tuples(chars, &font, &Scale::uniform(scale as f32));
         CharBrightnesses {
             char_lut: Self::brightness_tuples_to_lut(brightnesses_tuples),
         }
@@ -33,6 +30,8 @@ impl CharBrightnesses {
     }
 
     fn average_brightness(glyph: ScaledGlyph) -> u8 {
+        const BRIGHTNESS_CUTOFF: f32 = 0.5;
+        const COLOR: f32 = 255.0;
         let (glyph_width, glyph_height) = Self::glyph_dimensions(&glyph);
         let buffer_column = vec![u8::MIN; glyph_height as usize];
         let mut buffer = vec![buffer_column; glyph_width as usize];
@@ -127,10 +126,7 @@ mod char_brightnesses_tests {
     #[test]
     fn test_get_brightness_tuples() {
         let chars = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-        let font = &Font::try_from_bytes(include_bytes!(
-            "../../RobotoMono-Regular.ttf"
-        ))
-        .unwrap();
+        let font = &Font::try_from_bytes(include_bytes!("../../RobotoMono-Regular.ttf")).unwrap();
         let scale = 255;
         let new = CharBrightnesses::new(chars, font, scale);
         let default = CharBrightnesses::default();

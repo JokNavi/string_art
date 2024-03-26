@@ -8,3 +8,10 @@ edition = "2021"
 [dependencies]
 minifb = {version = "0.25.0"}
 rusttype = "0.9.3"
+
+[dev-dependencies]
+divan = "0.1.14"
+
+[[bench]]
+name = "main"
+harness = false

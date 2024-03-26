@@ -126,7 +126,7 @@ mod char_brightnesses_tests {
     #[test]
     fn test_get_brightness_tuples() {
         let chars = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-        let font = &Font::try_from_bytes(include_bytes!("../../RobotoMono-Regular.ttf")).unwrap();
+        let font = &Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap();
         let scale = 255;
         let new = CharBrightnesses::new(chars, font, scale);
         let default = CharBrightnesses::default();

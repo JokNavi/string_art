@@ -1,3 +1,4 @@
+use rusttype::{Font, Scale};
 use std::ops::Index;
 
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
@@ -8,6 +9,10 @@ pub struct CharPixelDensityLut {
 }
 
 impl CharPixelDensityLut {
+    pub fn new(chars: &[char], font: &Font, scale: Scale) -> Self {
+        todo!();
+    }
+
     pub fn from_lut(lut: [char; LUT_LENGTH]) -> Self {
         Self { char_lut: lut }
     }

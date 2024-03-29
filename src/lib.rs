@@ -1,13 +1,14 @@
 pub mod char_brightness_lut;
 pub mod char_pixel_density_lut;
-pub mod char_pixel_density_lut_builder;
 
 #[cfg(test)]
 mod tests {
 
     #[test]
     fn test_index() {
-        let index = 255u8;
-        dbg!(index.saturating_add(1));
+        let brightness = 50.0;
+        let color = 255.0;
+        let total_pixels = 100.0;
+        dbg!((brightness/total_pixels)*color);
     }
 }

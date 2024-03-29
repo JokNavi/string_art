@@ -8,10 +8,6 @@ pub struct CharPixelDensityLut {
 }
 
 impl CharPixelDensityLut {
-    pub fn new() -> Self {
-        todo!();
-    }
-
     pub fn from_lut(lut: [char; LUT_LENGTH]) -> Self {
         Self { char_lut: lut }
     }

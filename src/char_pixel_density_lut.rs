@@ -2,7 +2,7 @@ use std::ops::Index;
 
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
 
-#[derive(Debug, PartialEq, Clone, Copy, Eq)]
+#[derive(Debug, PartialEq, Clone, Eq)]
 pub struct CharPixelDensityLut {
     char_lut: [char; LUT_LENGTH],
 }

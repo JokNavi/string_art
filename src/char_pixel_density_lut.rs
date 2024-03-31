@@ -1,7 +1,13 @@
-use rusttype::{Font, Scale};
+use rusttype::{point, Font, Scale, ScaledGlyph};
 use std::ops::Index;
 
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
+
+pub enum CharPixelDensityError {
+    NoGlyphForChar,
+    TooLargeGlyph,
+    NoBoundingBoxForGlyph,
+}
 
 #[derive(Debug, PartialEq, Clone, Eq)]
 pub struct CharPixelDensityLut {
@@ -15,6 +21,21 @@ impl CharPixelDensityLut {
 
     pub fn from_lut(lut: [char; LUT_LENGTH]) -> Self {
         Self { char_lut: lut }
+    }
+
+    fn average_pixel_density(glyph: ScaledGlyph) -> Result<u8, CharPixelDensityError> {
+        let point = point(0.0, 0.0);
+
+        Ok(0)
+    }
+
+    fn glyph_dimensions(glyph: &ScaledGlyph) -> Result<(usize, usize), CharPixelDensityError> {
+        if let Some(bounding_box) = glyph.exact_bounding_box() {
+            let width = bounding_box.width().ceil();
+            let height = bounding_box.height().ceil();
+            return Ok((width as usize, height as usize));
+        }
+        return Err(CharPixelDensityError::NoBoundingBoxForGlyph);
     }
 
     fn create_lut(char_pixel_density_pairs: &[(char, u8)]) -> [char; LUT_LENGTH] {

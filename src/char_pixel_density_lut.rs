@@ -1,4 +1,4 @@
-use rusttype::{point, Font, Scale, ScaledGlyph};
+use rusttype::{point, Font, Rect, Scale, ScaledGlyph};
 use std::ops::Index;
 
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
@@ -25,17 +25,11 @@ impl CharPixelDensityLut {
 
     fn average_pixel_density(glyph: ScaledGlyph) -> Result<u8, CharPixelDensityError> {
         let point = point(0.0, 0.0);
-
+        let dimensions = glyph
+        .exact_bounding_box()
+        .map(|rect| GlyphDimensions::from_bounding_box(&rect))
+        .ok_or(CharPixelDensityError::NoBoundingBoxForGlyph)?;
         Ok(0)
-    }
-
-    fn glyph_dimensions(glyph: &ScaledGlyph) -> Result<(usize, usize), CharPixelDensityError> {
-        if let Some(bounding_box) = glyph.exact_bounding_box() {
-            let width = bounding_box.width().ceil();
-            let height = bounding_box.height().ceil();
-            return Ok((width as usize, height as usize));
-        }
-        return Err(CharPixelDensityError::NoBoundingBoxForGlyph);
     }
 
     fn create_lut(char_pixel_density_pairs: &[(char, u8)]) -> [char; LUT_LENGTH] {
@@ -78,5 +72,32 @@ impl Index<u8> for CharPixelDensityLut {
 
     fn index(&self, index: u8) -> &Self::Output {
         &self.char_lut[index as usize]
+    }
+}
+
+struct GlyphDimensions {
+    width: usize,
+    height: usize,
+}
+
+impl GlyphDimensions {
+    pub fn new(width: usize, height: usize) -> Self {
+        Self { width, height }
+    }
+
+    pub fn from_bounding_box(bounding_box: &Rect<f32>) -> Self {
+        let width = bounding_box.width().ceil();
+        let height = bounding_box.height().ceil();
+        let width = width.abs() as usize;
+        let height = height.abs() as usize;
+        GlyphDimensions::new(width, height)
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
     }
 }

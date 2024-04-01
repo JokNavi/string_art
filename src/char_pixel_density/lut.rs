@@ -1,13 +1,11 @@
 use rusttype::{point, Font, Rect, Scale, ScaledGlyph};
 use std::ops::Index;
 
-pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
+use crate::char_pixel_density::glyph_dimensions::GlyphDimensions;
 
-pub enum CharPixelDensityError {
-    NoGlyphForChar,
-    TooLargeGlyph,
-    NoBoundingBoxForGlyph,
-}
+use super::errors::CharPixelDensityError;
+
+pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
 
 #[derive(Debug, PartialEq, Clone, Eq)]
 pub struct CharPixelDensityLut {
@@ -23,12 +21,13 @@ impl CharPixelDensityLut {
         Self { char_lut: lut }
     }
 
-    fn average_pixel_density(glyph: ScaledGlyph) -> Result<u8, CharPixelDensityError> {
+    fn average_pixel_density(glyph: &ScaledGlyph) -> Result<u8, CharPixelDensityError> {
         let point = point(0.0, 0.0);
         let dimensions = glyph
-        .exact_bounding_box()
-        .map(|rect| GlyphDimensions::from_bounding_box(&rect))
-        .ok_or(CharPixelDensityError::NoBoundingBoxForGlyph)?;
+            .exact_bounding_box()
+            .map(|rect| GlyphDimensions::from_bounding_box(&rect))
+            .ok_or(CharPixelDensityError::MissingBoundingBox)?;
+        dbg!(&dimensions);
         Ok(0)
     }
 
@@ -75,29 +74,26 @@ impl Index<u8> for CharPixelDensityLut {
     }
 }
 
-struct GlyphDimensions {
-    width: usize,
-    height: usize,
-}
 
-impl GlyphDimensions {
-    pub fn new(width: usize, height: usize) -> Self {
-        Self { width, height }
+#[cfg(test)]
+mod char_pixel_density_lut_tests {
+    use super::*;
+
+    #[test]
+    fn test_index() {
+        let lut = super::CharPixelDensityLut::create_lut(&vec![('b', 2), ('a', 1)]);
+        assert_eq!(lut[1], 'a');
+        assert_eq!(lut[2], 'b');
     }
 
-    pub fn from_bounding_box(bounding_box: &Rect<f32>) -> Self {
-        let width = bounding_box.width().ceil();
-        let height = bounding_box.height().ceil();
-        let width = width.abs() as usize;
-        let height = height.abs() as usize;
-        GlyphDimensions::new(width, height)
-    }
-
-    pub fn width(&self) -> usize {
-        self.width
-    }
-
-    pub fn height(&self) -> usize {
-        self.height
+    #[test]
+    fn test_average_pixel_density() -> Result<(), CharPixelDensityError>{
+        let scale = Scale::uniform(10.0);
+        const FONT_BYTES: &[u8] = include_bytes!("../../files/RobotoMono-Regular.ttf");
+        let font = Font::try_from_bytes(FONT_BYTES).unwrap();
+        let glyph = font.glyph('a').scaled(scale);
+        CharPixelDensityLut::average_pixel_density(&glyph)?;
+        dbg!(glyph);
+        Ok(())
     }
 }

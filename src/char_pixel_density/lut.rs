@@ -8,11 +8,11 @@ use super::errors::CharPixelDensityError;
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
 
 #[derive(Debug, PartialEq, Clone, Eq)]
-pub struct CharPixelDensityLut {
+pub struct PixelDensityLut {
     char_lut: [char; LUT_LENGTH],
 }
 
-impl CharPixelDensityLut {
+impl PixelDensityLut {
     pub fn new(chars: &[char], font: &Font, scale: Scale) -> Self {
         todo!();
     }
@@ -21,14 +21,34 @@ impl CharPixelDensityLut {
         Self { char_lut: lut }
     }
 
-    fn average_pixel_density(glyph: &ScaledGlyph) -> Result<u8, CharPixelDensityError> {
+    fn average_pixel_density(glyph: &ScaledGlyph) -> Result<f64, CharPixelDensityError> {
         let point = point(0.0, 0.0);
-        let dimensions = glyph
+        if let Some(dimensions) = glyph
             .exact_bounding_box()
             .map(|rect| GlyphDimensions::from_bounding_box(&rect))
-            .ok_or(CharPixelDensityError::MissingBoundingBox)?;
-        dbg!(&dimensions);
-        Ok(0)
+        {
+            let mut buffer = vec![vec![0.0f32; dimensions.width()+1]; dimensions.height()+1];
+            let glyph = glyph.clone().positioned(point);
+            glyph.draw(|x, y, value| {
+                buffer[y as usize][x as usize] = value;
+            });
+            let total_pixels = dimensions.width() as f64 * dimensions.height() as f64;
+            let sum = buffer
+                .iter()
+                .map(|vec| vec.iter().sum::<f32>() as f64)
+                .sum::<f64>();
+            return Ok(sum / total_pixels);
+        }
+        Ok(0.0)
+    }
+
+
+    fn glyph_dimensions(glyph: &ScaledGlyph) -> (f32, f32) {
+        let h_metrics = glyph.h_metrics();
+        (
+            h_metrics.advance_width + h_metrics.left_side_bearing,
+            glyph.scale().y,
+        )
     }
 
     fn create_lut(char_pixel_density_pairs: &[(char, u8)]) -> [char; LUT_LENGTH] {
@@ -66,7 +86,7 @@ impl CharPixelDensityLut {
     }
 }
 
-impl Index<u8> for CharPixelDensityLut {
+impl Index<u8> for PixelDensityLut {
     type Output = char;
 
     fn index(&self, index: u8) -> &Self::Output {
@@ -74,26 +94,25 @@ impl Index<u8> for CharPixelDensityLut {
     }
 }
 
-
 #[cfg(test)]
 mod char_pixel_density_lut_tests {
     use super::*;
 
     #[test]
     fn test_index() {
-        let lut = super::CharPixelDensityLut::create_lut(&vec![('b', 2), ('a', 1)]);
+        let lut = super::PixelDensityLut::create_lut(&vec![('b', 2), ('a', 1)]);
         assert_eq!(lut[1], 'a');
         assert_eq!(lut[2], 'b');
     }
 
     #[test]
-    fn test_average_pixel_density() -> Result<(), CharPixelDensityError>{
-        let scale = Scale::uniform(10.0);
+    fn test_average_pixel_density() -> Result<(), CharPixelDensityError> {
+        let scale = Scale::uniform(100.0);
         const FONT_BYTES: &[u8] = include_bytes!("../../files/RobotoMono-Regular.ttf");
         let font = Font::try_from_bytes(FONT_BYTES).unwrap();
-        let glyph = font.glyph('a').scaled(scale);
-        CharPixelDensityLut::average_pixel_density(&glyph)?;
-        dbg!(glyph);
+        let glyph = font.glyph('.').scaled(scale);
+        let pixel_density = PixelDensityLut::average_pixel_density(&glyph)?;
+        dbg!(pixel_density);
         Ok(())
     }
 }

@@ -17,6 +17,4 @@ impl Display for CharPixelDensityError {
     }
 }
 
-impl Error for CharPixelDensityError { 
-
-}
+impl Error for CharPixelDensityError {}

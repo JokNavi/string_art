@@ -21,6 +21,18 @@ impl PixelDensityLut {
         Self::from_lut(pixel_density_lut)
     }
 
+    pub fn from_str(chars: &str, font: &Font, scale: Scale) -> Self {
+        let mut char_pixel_density_pairs = vec![(' ', u8::MIN); chars.len()];
+        for (i, char) in chars.char_indices() {
+            char_pixel_density_pairs[i] = (
+                char,
+                Self::average_pixel_density(&font.glyph(char).scaled(scale)),
+            );
+        }
+        let pixel_density_lut = Self::create_lut(&char_pixel_density_pairs);
+        Self::from_lut(pixel_density_lut)
+    }
+
     pub fn from_lut(lut: [char; LUT_LENGTH]) -> Self {
         Self { char_lut: lut }
     }

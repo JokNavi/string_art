@@ -1,4 +1,3 @@
-pub mod char_brightness_lut;
 pub mod pixel_density_lut;
 
 #[cfg(test)]

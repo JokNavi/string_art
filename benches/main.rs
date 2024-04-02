@@ -1,6 +1,5 @@
 use divan::{black_box, Bencher};
-
-pub mod char_brightnesses;
+pub mod pixel_density_lut;
 
 fn main() {
     // Run registered benchmarks.

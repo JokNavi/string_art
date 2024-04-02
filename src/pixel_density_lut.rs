@@ -33,7 +33,7 @@ impl PixelDensityLut {
         glyph.draw(|x, y, _| {
             buffer[y as usize][x as usize] = 1u16;
         });
-        let total_pixels = (buffer.len() * buffer[0].len()) as u16;
+        let total_pixels = ((buffer.len() + 1) * (buffer[0].len() + 1)) as u16;
         let sum = buffer
             .iter()
             .map(|vec| vec.iter().sum::<u16>())

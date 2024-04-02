@@ -1,7 +1,7 @@
 use crate::pixel_density_lut::PixelDensityLut;
 use image::DynamicImage;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TextArtEncoder {
     pixel_density_lut: PixelDensityLut,
 }

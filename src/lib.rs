@@ -1,5 +1,5 @@
 pub mod char_brightness_lut;
-pub mod char_pixel_density;
+pub mod pixel_density_lut;
 
 #[cfg(test)]
 mod tests {

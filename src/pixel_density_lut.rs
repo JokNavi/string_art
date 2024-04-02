@@ -1,8 +1,6 @@
 use rusttype::{point, Font, Scale, ScaledGlyph};
 use std::ops::Index;
 
-use super::errors::CharPixelDensityError;
-
 pub const LUT_LENGTH: usize = u8::MAX as usize + 1;
 
 #[derive(Debug, PartialEq, Clone, Eq)]
@@ -12,14 +10,22 @@ pub struct PixelDensityLut {
 
 impl PixelDensityLut {
     pub fn new(chars: &[char], font: &Font, scale: Scale) -> Self {
-        todo!();
+        let mut char_pixel_density_pairs = vec![(' ', u8::MIN); chars.len()];
+        for (i, char) in chars.iter().enumerate() {
+            char_pixel_density_pairs[i] = (
+                *char,
+                Self::average_pixel_density(&font.glyph(*char).scaled(scale)),
+            );
+        }
+        let pixel_density_lut = Self::create_lut(&char_pixel_density_pairs);
+        Self::from_lut(pixel_density_lut)
     }
 
     pub fn from_lut(lut: [char; LUT_LENGTH]) -> Self {
         Self { char_lut: lut }
     }
 
-    fn average_pixel_density(glyph: &ScaledGlyph) -> Result<u8, CharPixelDensityError> {
+    fn average_pixel_density(glyph: &ScaledGlyph) -> u8 {
         let point = point(0.0, 0.0);
         let (width, height) = Self::glyph_dimensions(&glyph);
         let mut buffer = vec![vec![0u16; width as usize + 1]; height as usize + 1];
@@ -32,7 +38,7 @@ impl PixelDensityLut {
             .iter()
             .map(|vec| vec.iter().sum::<u16>())
             .sum::<u16>();
-        return Ok((((sum as f64 * 255.0) / total_pixels as f64).round()) as u8);
+        (((sum as f64 * 255.0) / total_pixels as f64).round()) as u8
     }
 
     fn glyph_dimensions(glyph: &ScaledGlyph) -> (f32, f32) {
@@ -98,13 +104,12 @@ mod char_pixel_density_lut_tests {
     }
 
     #[test]
-    fn test_average_pixel_density() -> Result<(), CharPixelDensityError> {
+    fn test_average_pixel_density() {
         let scale = Scale::uniform(100.0);
-        const FONT_BYTES: &[u8] = include_bytes!("../../files/RobotoMono-Regular.ttf");
+        const FONT_BYTES: &[u8] = include_bytes!("../files/RobotoMono-Regular.ttf");
         let font = Font::try_from_bytes(FONT_BYTES).unwrap();
-        let glyph = font.glyph('.').scaled(scale);
-        let pixel_density = PixelDensityLut::average_pixel_density(&glyph)?;
+        let glyph = font.glyph('\u{25A0}').scaled(scale);
+        let pixel_density = PixelDensityLut::average_pixel_density(&glyph);
         dbg!(pixel_density);
-        Ok(())
     }
 }

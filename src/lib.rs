@@ -9,6 +9,6 @@ mod tests {
         let brightness = 50.0;
         let color = 255.0;
         let total_pixels = 100.0;
-        dbg!((brightness/total_pixels)*color);
+        dbg!((brightness / total_pixels) * color);
     }
 }

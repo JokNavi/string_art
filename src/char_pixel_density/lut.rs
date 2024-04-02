@@ -1,7 +1,5 @@
-use rusttype::{point, Font, Rect, Scale, ScaledGlyph};
+use rusttype::{point, Font, Scale, ScaledGlyph};
 use std::ops::Index;
-
-use crate::char_pixel_density::glyph_dimensions::GlyphDimensions;
 
 use super::errors::CharPixelDensityError;
 
@@ -21,27 +19,21 @@ impl PixelDensityLut {
         Self { char_lut: lut }
     }
 
-    fn average_pixel_density(glyph: &ScaledGlyph) -> Result<f64, CharPixelDensityError> {
+    fn average_pixel_density(glyph: &ScaledGlyph) -> Result<u8, CharPixelDensityError> {
         let point = point(0.0, 0.0);
-        if let Some(dimensions) = glyph
-            .exact_bounding_box()
-            .map(|rect| GlyphDimensions::from_bounding_box(&rect))
-        {
-            let mut buffer = vec![vec![0.0f32; dimensions.width()+1]; dimensions.height()+1];
-            let glyph = glyph.clone().positioned(point);
-            glyph.draw(|x, y, value| {
-                buffer[y as usize][x as usize] = value;
-            });
-            let total_pixels = dimensions.width() as f64 * dimensions.height() as f64;
-            let sum = buffer
-                .iter()
-                .map(|vec| vec.iter().sum::<f32>() as f64)
-                .sum::<f64>();
-            return Ok(sum / total_pixels);
-        }
-        Ok(0.0)
+        let (width, height) = Self::glyph_dimensions(&glyph);
+        let mut buffer = vec![vec![0u16; width as usize + 1]; height as usize + 1];
+        let glyph = glyph.clone().positioned(point);
+        glyph.draw(|x, y, _| {
+            buffer[y as usize][x as usize] = 1u16;
+        });
+        let total_pixels = (buffer.len() * buffer[0].len()) as u16;
+        let sum = buffer
+            .iter()
+            .map(|vec| vec.iter().sum::<u16>())
+            .sum::<u16>();
+        return Ok((((sum as f64 * 255.0) / total_pixels as f64).round()) as u8);
     }
-
 
     fn glyph_dimensions(glyph: &ScaledGlyph) -> (f32, f32) {
         let h_metrics = glyph.h_metrics();

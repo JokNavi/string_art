@@ -16,4 +16,3 @@ fn copy_from_slice(bencher: Bencher) {
         black_box(&mut dst).copy_from_slice(black_box(&src));
     });
 }
-

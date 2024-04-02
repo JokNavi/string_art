@@ -9,7 +9,8 @@ pub struct CharBrightnesses {
 
 impl CharBrightnesses {
     pub fn new(chars: &str, font: &Font, scale: u8) -> Self {
-        let brightnesses_tuples = Self::get_brightness_tuples(chars, &font, &Scale::uniform(scale as f32));
+        let brightnesses_tuples =
+            Self::get_brightness_tuples(chars, &font, &Scale::uniform(scale as f32));
         CharBrightnesses {
             char_lut: Self::brightness_tuples_to_lut(brightnesses_tuples),
         }
@@ -126,7 +127,8 @@ mod char_brightnesses_tests {
     #[test]
     fn test_get_brightness_tuples() {
         let chars = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-        let font = &Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap();
+        let font =
+            &Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap();
         let scale = 255;
         let new = CharBrightnesses::new(chars, font, scale);
         let default = CharBrightnesses::default();

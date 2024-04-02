@@ -2,11 +2,11 @@ use crate::pixel_density_lut::PixelDensityLut;
 use image::DynamicImage;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct TextArtEncoder {
+pub struct TextArtStringEncoder {
     pixel_density_lut: PixelDensityLut,
 }
 
-impl TextArtEncoder {
+impl TextArtStringEncoder {
     pub fn new<L: Into<PixelDensityLut>>(pixel_density_lut: L) -> Self {
         Self {
             pixel_density_lut: pixel_density_lut.into(),

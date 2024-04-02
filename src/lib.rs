@@ -8,7 +8,7 @@ mod tests {
     use image::{imageops::FilterType, io::Reader};
     use rusttype::{Font, Scale};
 
-    use crate::{pixel_density_lut::PixelDensityLut, text_art::TextArtEncoder};
+    use crate::{pixel_density_lut::PixelDensityLut, text_art::TextArtStringEncoder};
 
 
     #[test]
@@ -40,7 +40,7 @@ mod tests {
             .decode()
             .unwrap()
             .resize(300, 300, FilterType::Lanczos3);
-        let text_art_encoder = TextArtEncoder::new(pixel_density_lut);
+        let text_art_encoder = TextArtStringEncoder::new(pixel_density_lut);
         let string = text_art_encoder.encode_alternating(&image);
         fs::write("files/output/test-pattern.txt", &string).unwrap();
     }

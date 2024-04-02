@@ -1,55 +1,48 @@
-use image::{DynamicImage, GrayAlphaImage, GrayImage};
-use rusttype::{Font, Scale};
-
-use crate::pixel_density_lut::{self, PixelDensityLut};
+use crate::pixel_density_lut::PixelDensityLut;
+use image::DynamicImage;
 
 #[derive(Debug, Clone)]
-pub struct TextArtBuilder<'a> {
-    font: Option<Font<'a>>,
-    scale: Option<Scale>,
-    chars: Option<String>,
+pub struct TextArtEncoder {
+    pixel_density_lut: PixelDensityLut,
 }
 
-impl<'a> TextArtBuilder<'a> {
-    pub fn new() -> Self {
+impl TextArtEncoder {
+    pub fn new<L: Into<PixelDensityLut>>(pixel_density_lut: L) -> Self {
         Self {
-            font: None,
-            scale: None,
-            chars: None,
+            pixel_density_lut: pixel_density_lut.into(),
         }
     }
 
-    pub fn with_font(&mut self, font: Font<'a>) -> &mut Self {
-        self.font = Some(font);
-        self
+    fn encode_rows(&self, image: &DynamicImage) -> Vec<String> {
+        let image = image.to_luma8();
+        image
+            .chunks(image.width() as usize)
+            .map(|byte_row| {
+                byte_row
+                    .iter()
+                    .map(|byte| self.pixel_density_lut[*byte])
+                    .collect::<String>()
+            })
+            .collect::<Vec<String>>()
     }
 
-    pub fn with_scale(&mut self, scale: Scale) -> &mut Self {
-        self.scale = Some(scale);
-        self
+    pub fn encode(&self, image: &DynamicImage) -> String {
+        self.encode_rows(image)
+            .iter_mut()
+            .map(|row| {
+                row.push('\n');
+                row.clone()
+            })
+            .collect::<String>()
     }
 
-    pub fn with_chars(&mut self, chars: &str) -> &mut Self {
-        self.chars = Some(chars.to_owned());
-        self
-    }
-
-    fn pixel_density_lut(&self) -> PixelDensityLut {
-        let font = self.font.clone().unwrap_or(Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap());
-        let scale = self.scale.clone().unwrap_or(Scale::uniform(50.0));
-        let chars = self.chars.clone().unwrap_or(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".to_owned());
-        PixelDensityLut::new(&chars, self.font.as_ref().unwrap(), self.scale.unwrap())
-    }
-
-    pub fn build_string(&mut self, image: &GrayImage) -> String {
-        let pixel_density_lut = self.pixel_density_lut();
-        let image_width: usize = image.width() as usize;
-        let mut text_art_string = String::with_capacity(image_width * image.height() as usize);
-        for (index, value) in image.iter().enumerate() {
-            if (index + 1) % image_width == 0 {
-                text_art_string.push('\n');
-            }
-        }
-        todo!();
+    pub fn encode_alternating(&self, image: &DynamicImage) -> String {
+        self.encode_rows(image)
+            .iter_mut().step_by(2)
+            .map(|row| {
+                row.push('\n');
+                row.clone()
+            })
+            .collect::<String>()
     }
 }

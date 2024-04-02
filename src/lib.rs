@@ -3,9 +3,12 @@ pub mod text_art;
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
+    use image::{imageops::FilterType, io::Reader};
     use rusttype::{Font, Scale};
 
-    use crate::pixel_density_lut::PixelDensityLut;
+    use crate::{pixel_density_lut::PixelDensityLut, text_art::TextArtEncoder};
 
 
     #[test]
@@ -26,5 +29,19 @@ mod tests {
         let lut = PixelDensityLut::new(CHARS, &font, scale);
         println!("{:?}", &lut);
         println!("{}", '\u{1FB4D}');
+    }
+
+
+    #[test]
+    fn test_text_art_encoder() {
+        let pixel_density_lut = PixelDensityLut::default();
+        let image = Reader::open("files/input/test-pattern.webp")
+            .unwrap()
+            .decode()
+            .unwrap()
+            .resize(300, 300, FilterType::Lanczos3);
+        let text_art_encoder = TextArtEncoder::new(pixel_density_lut);
+        let string = text_art_encoder.encode_alternating(&image);
+        fs::write("files/output/test-pattern.txt", &string).unwrap();
     }
 }

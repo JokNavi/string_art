@@ -95,22 +95,22 @@ impl PixelDensityLut {
 impl Default for PixelDensityLut {
     fn default() -> Self {
         const LUT: [char; LUT_LENGTH] = [
-            ' ', ' ', ' ', ' ', ' ', '.', '\'', '\'', '`', '`', '_', '-', '-', '-', '-', '-', '"',
-            '"', '"', '"', '|', '|', '|', '|', '|', '!', '!', '!', '!', '!', '!', '!', '!', '!',
-            ';', '~', '~', '=', '^', '^', '^', '^', '^', '^', '^', ']', ']', ']', 'r', 'r', 'r',
-            '[', '<', '<', '>', '>', '>', '1', '1', '1', '1', '1', '1', '1', '1', 'n', 'u', 'u',
-            's', 's', '(', '(', 'z', 'z', 'z', '+', 'o', 'o', 'o', 'x', 'E', 'E', 'E', 'm', 'j',
-            '}', '?', '?', 'i', 'i', 'h', 'l', 'Z', 'N', 'N', 'w', 'w', 'U', 'd', 'd', 'J', 'J',
-            '4', '4', 'f', 'f', 'f', 'X', 'X', 'O', 'O', 'Y', 'Y', 'Y', 'Y', '@', '@', '@', '@',
-            'y', '&', '&', '&', '&', '$', '%', '%', '%', '%', '%', '%', 'Q', 'Q', 'Q', 'Q', 'Q',
+            ' ', ' ', ' ', ' ', ' ', ' ', '\'', '\'', '\'', '\'', '\'', '_', '`', '`', '`', '`',
+            '`', '`', '"', '"', '"', '"', '"', '-', '-', '-', '-', '-', ':', ':', ':', ':', ';',
+            ';', ';', ';', '|', '|', '|', '|', '|', '|', '|', '|', '|', '|', 'r', '~', '~', '~',
+            '~', '~', '~', '~', '~', '~', '~', 'z', 'z', 'z', 'z', ']', ']', ']', '1', 'v', 'v',
+            '(', 'u', 'u', 'u', 'u', 'u', '\\', '\\', ')', ')', ')', 'x', 'x', 't', 't', 'j', 'j',
+            'j', 'j', 'j', 'j', 'j', 'j', 'j', '}', '}', '}', '}', '}', 'k', 'k', 'k', 'k', 'k',
+            'k', '$', '$', 'O', 'O', 'O', 'O', 'O', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y',
+            'y', 'y', 'y', 'y', 'y', 'y', 'y', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
+            'S', 'S', 'S', 'S', 'S', 'S', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
             'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
             'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
             'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
             'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
             'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
             'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q',
+            'Q', 'Q',
         ];
         Self::from_lut(LUT)
     }
@@ -125,7 +125,7 @@ impl Index<u8> for PixelDensityLut {
 }
 
 #[cfg(test)]
-mod char_pixel_density_lut_tests {
+mod pixel_density_lut_tests {
     use super::*;
 
     #[test]
@@ -143,5 +143,73 @@ mod char_pixel_density_lut_tests {
         let glyph = font.glyph('a').scaled(scale);
         let pixel_density = PixelDensityLut::average_pixel_density(&glyph);
         dbg!(pixel_density);
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct PixelDensityLutBuilder<'a> {
+    font: Option<Font<'a>>,
+    scale: Option<Scale>,
+    chars: Option<String>,
+}
+
+impl<'a> PixelDensityLutBuilder<'a> {
+    pub fn new() -> Self {
+        Self {
+            font: None,
+            scale: None,
+            chars: None,
+        }
+    }
+
+    pub fn with_font(&mut self, font: Font<'a>) -> &mut Self {
+        self.font = Some(font);
+        self
+    }
+
+    pub fn with_scale(&mut self, scale: Scale) -> &mut Self {
+        self.scale = Some(scale);
+        self
+    }
+
+    pub fn with_chars(&mut self, chars: &str) -> &mut Self {
+        self.chars = Some(chars.to_owned());
+        self
+    }
+
+    pub fn get_font(&self) -> Font {
+        self.font.clone().unwrap_or(
+            Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap(),
+        )
+    }
+
+    pub fn get_scale(&self) -> Scale {
+        self.scale.clone().unwrap_or(Scale::uniform(12.0))
+    }
+
+    pub fn get_chars(&self) -> String {
+        self.chars.clone().unwrap_or(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".to_owned())
+    }
+
+    pub fn build(&self) -> PixelDensityLut {
+        if let (None, None, None) = (&self.chars, &self.font, self.scale) {
+            return PixelDensityLut::default();
+        }
+        let font = self.get_font();
+        let scale = self.get_scale();
+        let chars = self.get_chars();
+        PixelDensityLut::new(&chars, &font, scale)
+    }
+}
+
+#[cfg(test)]
+mod pixel_density_lut_builder_tests {
+    use super::*;
+
+    #[test]
+    fn text_default() {
+        let pixel_density_lut_builder = PixelDensityLutBuilder::default();
+        let pixel_density_lut = PixelDensityLut::default();
+        assert_eq!(pixel_density_lut_builder.build(), pixel_density_lut);
     }
 }

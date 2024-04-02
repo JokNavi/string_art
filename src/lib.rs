@@ -20,7 +20,7 @@ mod tests {
     fn test_pixel_density_lut() {
         const CHARS: &str = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         const FONT_BYTES: &[u8] = include_bytes!("../files/RobotoMono-Regular.ttf");
-        const SCALE: f32 = 50.0;
+        const SCALE: f32 = 12.0;
         let font = Font::try_from_bytes(FONT_BYTES).unwrap();
         let scale = Scale::uniform(SCALE);
         let lut = PixelDensityLut::new(CHARS, &font, scale);

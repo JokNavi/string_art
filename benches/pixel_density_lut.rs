@@ -11,6 +11,6 @@ fn pixel_density_lut(bencher: Bencher) {
     let scale = Scale::uniform(SCALE as f32);
 
     bencher.bench_local(move || {
-        black_box(PixelDensityLut::from_str(CHARS, &font, scale));
+        black_box(PixelDensityLut::new(CHARS, &font, scale));
     });
 }

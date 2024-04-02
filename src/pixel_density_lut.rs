@@ -31,7 +31,7 @@ impl PixelDensityLut {
         }
         let pixel_density_lut = Self::create_lut(&char_pixel_density_pairs);
         Self::from_lut(pixel_density_lut)
-    }    
+    }
 
     pub fn from_lut(lut: [char; LUT_LENGTH]) -> Self {
         Self { char_lut: lut }
@@ -39,8 +39,12 @@ impl PixelDensityLut {
 
     fn average_pixel_density(glyph: &ScaledGlyph) -> u8 {
         let point = point(0.0, 0.0);
-        let (width, height) = Self::glyph_dimensions(&glyph);
-        let mut buffer = vec![vec![0u16; width as usize + 1]; height as usize + 1];
+        let glyph_width = {
+            let h_metrics = glyph.h_metrics();
+            h_metrics.advance_width + h_metrics.left_side_bearing
+        };
+        let glyph_height = glyph.scale().y;
+        let mut buffer = vec![vec![0u16; glyph_width as usize + 1]; glyph_height as usize + 1];
         let glyph = glyph.clone().positioned(point);
         glyph.draw(|x, y, _| {
             buffer[y as usize][x as usize] = 1u16;
@@ -51,14 +55,6 @@ impl PixelDensityLut {
             .map(|vec| vec.iter().sum::<u16>())
             .sum::<u16>();
         (((sum as f64 * 255.0) / total_pixels as f64).round()) as u8
-    }
-
-    fn glyph_dimensions(glyph: &ScaledGlyph) -> (f32, f32) {
-        let h_metrics = glyph.h_metrics();
-        (
-            h_metrics.advance_width + h_metrics.left_side_bearing,
-            glyph.scale().y,
-        )
     }
 
     fn create_lut(char_pixel_density_pairs: &[(char, u8)]) -> [char; LUT_LENGTH] {

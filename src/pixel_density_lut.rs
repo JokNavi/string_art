@@ -10,7 +10,7 @@ pub struct PixelDensityLut {
 
 impl PixelDensityLut {
     pub fn new(chars: &[char], font: &Font, scale: Scale) -> Self {
-        let mut char_pixel_density_pairs = vec![(' ', u8::MIN); chars.len()];
+        let mut char_pixel_density_pairs = vec![('\x00', u8::MIN); chars.len()];
         for (i, char) in chars.iter().enumerate() {
             char_pixel_density_pairs[i] = (
                 *char,
@@ -144,7 +144,7 @@ mod char_pixel_density_lut_tests {
         let scale = Scale::uniform(100.0);
         const FONT_BYTES: &[u8] = include_bytes!("../files/RobotoMono-Regular.ttf");
         let font = Font::try_from_bytes(FONT_BYTES).unwrap();
-        let glyph = font.glyph('\u{25A0}').scaled(scale);
+        let glyph = font.glyph('a').scaled(scale);
         let pixel_density = PixelDensityLut::average_pixel_density(&glyph);
         dbg!(pixel_density);
     }

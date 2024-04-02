@@ -1,4 +1,5 @@
 pub mod pixel_density_lut;
+pub mod text_art;
 
 #[cfg(test)]
 mod tests {

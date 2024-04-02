@@ -1,5 +1,5 @@
 use crate::pixel_density_lut::PixelDensityLut;
-use image::DynamicImage;
+use image::{DynamicImage, GrayImage};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TextArtStringEncoder {
@@ -27,22 +27,27 @@ impl TextArtStringEncoder {
     }
 
     pub fn encode(&self, image: &DynamicImage) -> String {
-        self.encode_rows(image)
-            .iter_mut()
-            .map(|row| {
-                row.push('\n');
-                row.clone()
-            })
-            .collect::<String>()
+        self.encode_rows(image).join("\n")
     }
 
     pub fn encode_alternating(&self, image: &DynamicImage) -> String {
         self.encode_rows(image)
-            .iter_mut().step_by(2)
-            .map(|row| {
-                row.push('\n');
-                row.clone()
-            })
-            .collect::<String>()
+            .iter()
+            .step_by(2)
+            .cloned()
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
+}
+
+pub struct TextArtImageEncoder {}
+
+impl TextArtImageEncoder {
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    pub fn encode() -> GrayImage{
+        todo!();
     }
 }

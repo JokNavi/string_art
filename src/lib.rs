@@ -24,5 +24,6 @@ mod tests {
         let scale = Scale::uniform(SCALE as f32);
         let lut = PixelDensityLut::from_str(CHARS, &font, scale);
         println!("{:?}", &lut);
+        println!("{}", '\u{1FB4D}');
     }
 }

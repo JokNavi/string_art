@@ -202,6 +202,12 @@ impl<'a> PixelDensityLutBuilder<'a> {
     }
 }
 
+impl<'a> From<PixelDensityLutBuilder<'a>> for PixelDensityLut {
+    fn from(pixel_density_lut_builder: PixelDensityLutBuilder) -> Self {
+        pixel_density_lut_builder.build()
+    }
+}
+
 #[cfg(test)]
 mod pixel_density_lut_builder_tests {
     use super::*;

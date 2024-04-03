@@ -48,11 +48,10 @@ mod tests {
 
     #[test]
     fn test_image_to_string_image() {
-        let image = Reader::open("files/input/test-pattern.webp")
+        let image = Reader::open("files/input/test-pattern-small.webp")
             .unwrap()
             .decode()
-            .unwrap()
-            .resize(300, 300, FilterType::Lanczos3);
+            .unwrap();
         let image_encoder = TextArtImageEncoder::default();
         let image = image_encoder.encode(image);
         image.save("files/output/test-pattern.jpg").unwrap();

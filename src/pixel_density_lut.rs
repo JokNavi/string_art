@@ -94,25 +94,10 @@ impl PixelDensityLut {
 
 impl Default for PixelDensityLut {
     fn default() -> Self {
-        const LUT: [char; LUT_LENGTH] = [
-            ' ', ' ', ' ', ' ', ' ', ' ', '\'', '\'', '\'', '\'', '\'', '_', '`', '`', '`', '`',
-            '`', '`', '"', '"', '"', '"', '"', '-', '-', '-', '-', '-', ':', ':', ':', ':', ';',
-            ';', ';', ';', '|', '|', '|', '|', '|', '|', '|', '|', '|', '|', 'r', '~', '~', '~',
-            '~', '~', '~', '~', '~', '~', '~', 'z', 'z', 'z', 'z', ']', ']', ']', '1', 'v', 'v',
-            '(', 'u', 'u', 'u', 'u', 'u', '\\', '\\', ')', ')', ')', 'x', 'x', 't', 't', 'j', 'j',
-            'j', 'j', 'j', 'j', 'j', 'j', 'j', '}', '}', '}', '}', '}', 'k', 'k', 'k', 'k', 'k',
-            'k', '$', '$', 'O', 'O', 'O', 'O', 'O', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y',
-            'y', 'y', 'y', 'y', 'y', 'y', 'y', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S',
-            'S', 'S', 'S', 'S', 'S', 'S', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q', 'Q',
-            'Q', 'Q',
-        ];
-        Self::from_lut(LUT)
+        let scale = Scale::uniform(12.0);
+        let font = Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap();
+        let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Self::new(chars, &font, scale)
     }
 }
 

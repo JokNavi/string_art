@@ -76,11 +76,13 @@ impl<'a> TextArtImageEncoder<'a> {
                     .scaled(self.scale)
                     .positioned(point(image_x as f32 * glyph_width as f32, image_y as f32));
                 glyph.draw(|x, y, v| {
-                    buffer.put_pixel(
-                        image_x as u32 * glyph_width + x,
-                        image_y as u32 * glyph_height + y,
-                        Luma([(v * 255.0) as u8]),
-                    );
+                    if v > 0.0 {
+                        buffer.put_pixel(
+                            image_x as u32 * glyph_width + x,
+                            image_y as u32 * glyph_height + y,
+                            Luma([(v * 255.0) as u8]),
+                        );
+                    }
                 });
             }
         }

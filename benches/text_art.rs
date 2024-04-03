@@ -8,6 +8,6 @@ fn text_art_encode(bencher: Bencher) {
     let image = DynamicImage::ImageLuma8(image);
     let text_art_encoder = TextArtStringEncoder::default();
     bencher.bench_local(move || {
-        black_box(text_art_encoder.encode_alternating(&image));
+        black_box(text_art_encoder.encode_alternating(image.clone()));
     });
 }

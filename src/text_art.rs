@@ -1,5 +1,5 @@
-use crate::pixel_density_lut::PixelDensityLut;
-use image::{DynamicImage, GrayImage, Luma};
+use crate::pixel_density_lut::{self, PixelDensityLut};
+use image::{buffer, DynamicImage, GrayImage, ImageBuffer, Luma};
 use rusttype::{point, Font, Scale, ScaledGlyph};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -14,8 +14,8 @@ impl TextArtStringEncoder {
         }
     }
 
-    fn encode_rows(&self, image: &DynamicImage) -> Vec<String> {
-        let image = image.to_luma8();
+    fn encode_rows(&self, image: impl Into<GrayImage>) -> Vec<String> {
+        let image: GrayImage = image.into();
         image
             .chunks(image.width() as usize)
             .map(|byte_row| {
@@ -27,11 +27,11 @@ impl TextArtStringEncoder {
             .collect::<Vec<String>>()
     }
 
-    pub fn encode(&self, image: &DynamicImage) -> String {
+    pub fn encode(&self, image: impl Into<GrayImage>) -> String {
         self.encode_rows(image).join("\n")
     }
 
-    pub fn encode_alternating(&self, image: &DynamicImage) -> String {
+    pub fn encode_alternating(&self, image: impl Into<GrayImage>) -> String {
         self.encode_rows(image)
             .iter()
             .step_by(2)
@@ -41,62 +41,92 @@ impl TextArtStringEncoder {
     }
 }
 
-pub fn string_to_image(font: Font, scale: Scale, string: &str) -> GrayImage {
-    let glyphs = string
-        .lines()
-        .map(|row| {
-            row.chars()
-                .map(|char| font.glyph(char).scaled(scale))
-                .collect::<Vec<ScaledGlyph>>()
-        })
-        .collect::<Vec<Vec<ScaledGlyph>>>();
-    let image_width = glyphs.iter().fold(0.0f32, |acc, row| {
-        let row_width = row
-            .iter()
-            .map(|glyph| {
-                let h_metrics = glyph.h_metrics();
-                h_metrics.advance_width + h_metrics.left_side_bearing
-            })
-            .sum::<f32>().ceil();
-        acc.max(row_width)
-    });
-    let image_height = glyphs.len() as f32 * scale.y;
-    let mut image = GrayImage::new(image_width as u32, image_height as u32);
-    for (y, row) in glyphs.iter().enumerate() {
-        let mut image_x: u32 = 0;
-        for (_, glyph) in row.iter().enumerate() {
-            let width = {
-                let h_metrics = glyph.h_metrics();
-                h_metrics.advance_width + h_metrics.left_side_bearing
-            }.ceil();
-            let height = glyph.scale().y.ceil();
-            let image_y = y as u32 * height as u32;
-            let glyph = glyph.clone().positioned(point(0.0, 0.0));
-            glyph.draw(|glyph_x, glyph_y, v| {
-                image.put_pixel(
-                    image_x + glyph_x,
-                    image_y + glyph_y,
-                    Luma([(v * 255.0) as u8]),
-                );
-            });
-            image_x += width as u32;
+#[derive(Debug, Clone)]
+pub struct TextArtImageEncoder<'a> {
+    font: Font<'a>,
+    scale: Scale,
+    string_encoder: TextArtStringEncoder,
+}
+
+impl<'a> TextArtImageEncoder<'a> {
+    pub fn new(font: Font<'a>, scale: Scale, characters: &str) -> Self {
+        let pixel_density_lut = PixelDensityLut::new(characters, &font, scale);
+        let string_encoder = TextArtStringEncoder::new(pixel_density_lut);
+        Self {
+            font,
+            scale,
+            string_encoder,
         }
     }
-    image
+
+    fn get_buffer(&self, image: &GrayImage) -> GrayImage {
+        let glyph_width = self.scale.x.floor() as u32;
+        let glyph_height = self.scale.y.floor() as u32;
+        GrayImage::new(image.width() * glyph_width, image.height() * glyph_height)
+    }
+
+    fn string_to_image(&self, mut buffer: GrayImage, string: &str) -> GrayImage {
+        let glyph_width = self.scale.x.floor() as u32;
+        let glyph_height = self.scale.y.floor() as u32;
+        for (image_y, row) in string.lines().enumerate() {
+            for (image_x, char) in row.chars().enumerate() {
+                let glyph = self
+                    .font
+                    .glyph(char)
+                    .scaled(self.scale)
+                    .positioned(point(image_x as f32 * glyph_width as f32, image_y as f32));
+                glyph.draw(|x, y, v| {
+                    buffer.put_pixel(
+                        image_x as u32 * glyph_width + x,
+                        image_y as u32 * glyph_height + y,
+                        Luma([(v * 255.0) as u8]),
+                    );
+                });
+            }
+        }
+        buffer
+    }
+
+    pub fn encode(&self, image: impl Into<GrayImage>) -> GrayImage {
+        let image = image.into();
+        let buffer = self.get_buffer(&image);
+        let string = self.string_encoder.encode(image);
+        self.string_to_image(buffer, &string)
+    }
+
+    pub fn encode_alternate(&self, image: impl Into<GrayImage>) -> GrayImage {
+        let image = image.into();
+        let buffer = self.get_buffer(&image);
+        let string = self.string_encoder.encode_alternating(image);
+        self.string_to_image(buffer, &string)
+    }
+}
+
+impl Default for TextArtImageEncoder<'static> {
+    fn default() -> Self {
+        let scale = Scale::uniform(12.0);
+        let font = Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap();
+        Self {
+            scale,
+            font,
+            string_encoder: TextArtStringEncoder::default(),
+        }
+    }
 }
 
 #[cfg(test)]
 mod text_art_image_encoder_tests {
-    use rusttype::{Font, Scale};
-
-    use crate::text_art::string_to_image;
+    use super::*;
+    use image::io::Reader;
 
     #[test]
     fn test_encode() {
-        let scale = Scale::uniform(25.0);
-        const FONT_BYTES: &[u8] = include_bytes!("../files/RobotoMono-Regular.ttf");
-        let font = Font::try_from_bytes(FONT_BYTES).unwrap();
-        let image = string_to_image(font, scale, "BBBAAACCC\nAAABBBCCC");
-        let _ = image.save("files/output/test-pattern.jpg");
+        let image = Reader::open("files/input/test-pattern-small.webp")
+            .unwrap()
+            .decode()
+            .unwrap();
+        let image_encoder = TextArtImageEncoder::default();
+        let image = image_encoder.encode(image);
+        image.save("files/output/test-pattern.jpg").unwrap();
     }
 }

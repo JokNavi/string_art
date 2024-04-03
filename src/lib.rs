@@ -9,8 +9,8 @@ mod tests {
     use rusttype::{Font, Scale};
 
     use crate::{
-        pixel_density_lut::{PixelDensityLut, PixelDensityLutBuilder},
-        text_art::{string_to_image, TextArtStringEncoder},
+        pixel_density_lut::PixelDensityLut,
+        text_art::{TextArtImageEncoder, TextArtStringEncoder},
     };
 
     #[test]
@@ -42,27 +42,19 @@ mod tests {
             .unwrap()
             .resize(300, 300, FilterType::Lanczos3);
         let text_art_encoder = TextArtStringEncoder::new(pixel_density_lut);
-        let string = text_art_encoder.encode_alternating(&image);
+        let string = text_art_encoder.encode_alternating(image);
         fs::write("files/output/test-pattern.txt", &string).unwrap();
     }
 
     #[test]
     fn test_image_to_string_image() {
-        let scale = Scale::uniform(16.0);
-        const FONT_BYTES: &[u8] = include_bytes!("../files/RobotoMono-Regular.ttf");
-        let font = Font::try_from_bytes(FONT_BYTES).unwrap();
-        let pixel_density_lut = PixelDensityLutBuilder::new()
-            .with_font(font.clone())
-            .with_scale(scale.clone())
-            .build();
         let image = Reader::open("files/input/test-pattern.webp")
             .unwrap()
             .decode()
             .unwrap()
             .resize(300, 300, FilterType::Lanczos3);
-        let text_art_encoder = TextArtStringEncoder::new(pixel_density_lut);
-        let string = text_art_encoder.encode_alternating(&image);
-        let image = string_to_image(font, scale, &string);
-        let _ = image.save("files/output/test-pattern.jpg");
+        let image_encoder = TextArtImageEncoder::default();
+        let image = image_encoder.encode(image);
+        image.save("files/output/test-pattern.jpg").unwrap();
     }
 }

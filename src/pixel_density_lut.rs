@@ -96,7 +96,7 @@ impl Default for PixelDensityLut {
     fn default() -> Self {
         let scale = Scale::uniform(12.0);
         let font = Font::try_from_bytes(include_bytes!("../files/RobotoMono-Regular.ttf")).unwrap();
-        let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let chars =  " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         Self::new(chars, &font, scale)
     }
 }

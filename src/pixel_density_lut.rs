@@ -169,7 +169,7 @@ impl<'a> PixelDensityLutBuilder<'a> {
     }
 
     pub fn get_scale(&self) -> Scale {
-        self.scale.clone().unwrap_or(Scale::uniform(12.0))
+        self.scale.unwrap_or(Scale::uniform(12.0))
     }
 
     pub fn get_chars(&self) -> String {

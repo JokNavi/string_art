@@ -14,14 +14,6 @@ mod tests {
     };
 
     #[test]
-    fn test_index() {
-        let brightness = 50.0;
-        let color = 255.0;
-        let total_pixels = 100.0;
-        dbg!((brightness / total_pixels) * color);
-    }
-
-    #[test]
     fn test_pixel_density_lut() {
         const CHARS: &str = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
         const FONT_BYTES: &[u8] = include_bytes!("../files/RobotoMono-Regular.ttf");

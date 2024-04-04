@@ -1,6 +1,6 @@
-use crate::pixel_density_lut::{self, PixelDensityLut};
-use image::{buffer, DynamicImage, GrayImage, ImageBuffer, Luma};
-use rusttype::{point, Font, Scale, ScaledGlyph};
+use crate::pixel_density_lut::PixelDensityLut;
+use image::{GrayImage, Luma};
+use rusttype::{point, Font, Scale};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TextArtStringEncoder {
